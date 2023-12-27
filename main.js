@@ -71,10 +71,10 @@ class Store {
 class UI {
 //remove listed films from display, restoring this part of the DOM to its original state.
 	 refreshDisplay() {
-		const toWatchList = document.querySelector('#to-watch'); 
+		const containerList = document.querySelector('#to-watch'); 
 		const watchedList = document.querySelector('#watched'); 
 
-		toWatchList.innerHTML = 
+		containerList.innerHTML = 
 			`   <h1 class = "text-white display-5 text-center p-3">To Watch</h1>
 				<div id= "filter-sort-bar" class = "d-flex justify-content-between m-2">
 					<div id = filter-by class = "text-white col-2 mx-5 my-2 p-4 text-center"><button class = "btn btn-light"><i class= "bi bi-filter fs-4"></i></button>
@@ -95,7 +95,7 @@ class UI {
 
 		watchedList.innerHTML = `
 				<h1 class = "text-white display-5 text-center p-3">Watched</h1>
-				<div id= "filter-sort-bar-two" class = "d-flex justify-content-between m-2">
+				<div id= "filter-sort-bar" class = "d-flex justify-content-between m-2">
 					<div id = filter-by class = "text-white col-2 mx-5 my-2 p-4 text-center"><button class = "btn btn-light"><i class= "bi bi-filter fs-4"></i></button>
 					</div>
 					<div id = "sort-by"class="text-white col-2 mx-5 my-2 p-4 text-center">
@@ -120,7 +120,7 @@ class UI {
 	 displayStoredFilms(films) {
 		const movieApp = new MovieApp(api, store, ui); 
 	    movieApp.refreshDisplay(); 
-		const toWatchList = document.querySelector('#to-watch'); 
+		const containerList = document.querySelector('#to-watch'); 
 		const watchedList = document.querySelector('#watched'); 
 //Sort films into two categories (watched / to watch), place in the corresponding div and style accordingly		
 		films.forEach((film, index) => { 
@@ -155,7 +155,7 @@ class UI {
 						<button class = "remove-button btn btn-danger m-2">Remove</button>
 					</div>
 					`
-				toWatchList.appendChild(filmBox);				
+				containerList.appendChild(filmBox);				
 			}
 		});
 	}
@@ -237,8 +237,8 @@ class UI {
 //Add a searched title to the watch list, using data from API and styling accordingly
 	addToWatchList (data) {
 		let newFilmBox = document.createElement('div');
-		const toWatch = document.querySelector('#to-watch'); 
-		newFilmBox.classList.add('container', 'bg-warning',  'p-3', 'm-2', 'rounded', 'row', 'justify-content-around');
+		const container = document.querySelector('#to-watch'); 
+		newFilmBox.classList.add('film-box', 'container', 'bg-warning',  'p-3', 'm-2', 'rounded', 'row', 'justify-content-around');
 		newFilmBox.innerHTML = 
 	    `
 	    	<div id = "film-${data.imdbID}" class = "film-name col-2 p-2"><h6 id ="film-title" class = "film-title">${data.Title}</h6></div>
@@ -253,7 +253,7 @@ class UI {
 			</div>
 
 	    `
-	    toWatch.appendChild(newFilmBox); 
+	    container.appendChild(newFilmBox); 
 	    const filmData = {
 	    	imdb: `${data.imdbID}`,
 	    	title: `${data.Title}`,
@@ -271,7 +271,7 @@ class UI {
 		console.log(data); 
 		let newFilmBox = document.createElement('div');
 		const watched = document.querySelector('#watched'); 
-		newFilmBox.classList.add('container', 'bg-success',  'p-3', 'm-2', 'rounded', 'row', 'justify-content-around');
+		newFilmBox.classList.add('film-box', 'container', 'bg-success',  'p-3', 'm-2', 'rounded', 'row', 'justify-content-around');
 		newFilmBox.innerHTML = 
 		    `
 		    	<div id = "film-${data.imdbID}" class = "film-name col-2 p-2"><h6 id ="film-title" class = "film-title">${data.Title}</h6></div>
@@ -304,7 +304,7 @@ class UI {
  
 	}	
 //Move a film from to watch list to watched list
-	moveFromWatchToWatched(data) {
+	moveFromWatchcontainered(data) {
 		console.log(data.imdbID); 
 		const newFilmData = {
 			imdb: `${data.imdbID}`,
@@ -332,9 +332,10 @@ class UI {
 //sort list alphabetically / by year / by metascore 
 class Sort  {
 
- 	sortData(category) {
- 		const toWatch = document.querySelector('#to-watch');
- 		const filmBoxes = Array.from(document.querySelectorAll('.film-box'));
+ 	sortData(category, container) {
+ 		const listContainer = document.querySelector(`#${container}`);
+ 		console.log(listContainer);
+ 		const filmBoxes = Array.from(listContainer.querySelectorAll('.film-box'));
  		
 //SORTING LOGIC
  		filmBoxes.sort((a, b) => {
@@ -352,7 +353,7 @@ class Sort  {
  			}		
  		});
 
- 		toWatch.innerHTML = 
+ 		listContainer.innerHTML = 
  			`<h1 class = "text-white display-5 text-center p-3">To Watch</h1>
 				<div id= "filter-sort-bar" class = "d-flex justify-content-between m-2">
 					<div id = filter-by class = "text-white col-2 mx-5 my-2 p-4 text-center"><button class = "btn btn-light"><i class= "bi bi-filter fs-4"></i></button>
@@ -371,33 +372,38 @@ class Sort  {
 					</div>					
 				</div>`
 
-		filmBoxes.forEach((box) => toWatch.appendChild(box)); 
+		filmBoxes.forEach((box) => listContainer.appendChild(box)); 
 
-		let filterSortBar = document.querySelector('#filter-sort-bar'); 
-		filterSortBar.addEventListener('click', (e) => {
-			 if (e.target.id === 'title') {
-				console.log('title'); 
-				movieApp.sortData('film-title'); 
-			} if (e.target.id === 'year') {
-				console.log('year');
-				movieApp.sortData('film-year'); 
-			} if (e.target.id === 'director') {
-				console.log('director');
-				movieApp.sortData('film-director'); 
-			} if (e.target.id === 'genre') {
-				console.log('genre'); 
-				movieApp.sortData('film-genre'); 
-			} if (e.target.id === 'runtime') {
-				console.log('runtime');
-				movieApp.sortData('film-runtime'); 
-			} if (e.target.id === 'metascore') {
-				console.log('metascore');
-				movieApp.sortData('film-metascore'); 
-			} else {
-				console.log('no sort option selected'); 
-			}
+	let filterSortBars = document.querySelectorAll('#filter-sort-bar'); 
+		filterSortBars.forEach((filterSortBar) => {
+			filterSortBar.addEventListener('click', (e) => {
+				console.log('filter sort bar element clicked'); 
+				const container = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+				console.log(container); 
+				 if (e.target.id === 'title') {
+					console.log('title');  
+					movieApp.sortData('film-title', container); 
+				} if (e.target.id === 'year') {
+					console.log('year');
+					movieApp.sortData('film-year', container); 
+				} if (e.target.id === 'director') {
+					console.log('director');
+					movieApp.sortData('film-director', container); 
+				} if (e.target.id === 'genre') {
+					console.log('genre'); 
+					movieApp.sortData('film-genre', container); 
+				} if (e.target.id === 'runtime') {
+					console.log('runtime');
+					movieApp.sortData('film-runtime', container); 
+				} if (e.target.id === 'metascore') {
+					console.log('metascore');
+					movieApp.sortData('film-metascore', container); 
+				} else {
+					console.log('no sort option selected'); 
+				}
 
-		});
+			});
+		}); 
  	}
 
 }
@@ -443,7 +449,7 @@ class MovieApp {
 	}
 
 //CHANGE NAME LATER - NO LONGER STORES
-	async fetchStoreAndMoveToWatch(filmTitle) {
+	async fetchStoreAndMovecontainer(filmTitle) {
 		try {
 			const data = await this.api.getFilm(filmTitle);
 			this.ui.clearSearched(); 
@@ -454,7 +460,7 @@ class MovieApp {
 	}
 
 //CHANGE NAME LATER - NO LONGER STORES
-	async fetchStoreAndMoveToWatched(filmTitle) {
+	async fetchStoreAndMovecontainered(filmTitle) {
 		try {	
 			const data = await this.api.getFilm(filmTitle);
 			this.ui.addToWatchedList(data); 
@@ -463,11 +469,11 @@ class MovieApp {
 		}		
 	}
 //CHANGE NAME LATER - NO LONGER STORES
-	async fetchStoreAndMoveFromWatchToWatched(filmTitle) {
+	async fetchStoreAndMoveFromWatchcontainered(filmTitle) {
 		try {	
 			const data = await this.api.getFilm(filmTitle); 
 			console.log(data); 
-			this.ui.moveFromWatchToWatched(data); 
+			this.ui.moveFromWatchcontainered(data); 
 		}  catch (error) {
 			console.error('error fetching and moving from watch to watched', error);
 		}	
@@ -497,9 +503,9 @@ class MovieApp {
 		this.ui.refreshDisplay(); 
 	}
 
-	sortData(category) {
-		console.log(category);
-		this.sort.sortData(category); 
+	sortData(category, container) {
+		console.log(category, container);
+		this.sort.sortData(category, container); 
 	}
 
 }
@@ -535,7 +541,7 @@ let filmTitle = '';
 let encodedTitle = encodeURIComponent(filmTitle);
 const filmListDisplay = document.querySelector('#film-list-display'); 
 const filmListContainer = document.querySelector('#film-list-container'); 
-const toWatchList = document.querySelector('#to-watch'); 
+const containerList = document.querySelector('#to-watch'); 
 const watchedList = document.querySelector('#watched'); 
 
 filmListContainer.addEventListener('click', (e) =>  {
@@ -550,7 +556,7 @@ filmListContainer.addEventListener('click', (e) =>  {
 		const currentTitle = currentTitleBox.textContent;
 		console.log(currentTitle); 
 		
-		movieApp.fetchStoreAndMoveToWatch(currentTitle); 
+		movieApp.fetchStoreAndMovecontainer(currentTitle); 
 	}
 
 	if (target.classList.contains('watched-button')) {
@@ -561,10 +567,10 @@ filmListContainer.addEventListener('click', (e) =>  {
 		//Create an instance of the MovieAPP class 
 		console.log(currentBox); 
 		if(currentBox.classList.contains("film-list-display")) {
-			movieApp.fetchStoreAndMoveToWatched(currentTitle);
+			movieApp.fetchStoreAndMovecontainered(currentTitle);
 			console.log('moved to watched') 
 		} else {
-			movieApp.fetchStoreAndMoveFromWatchToWatched(currentTitle); 
+			movieApp.fetchStoreAndMoveFromWatchcontainered(currentTitle); 
 				console.log('moved from watch to watched')
 		} 
 		console.log(currentBox); 
@@ -595,55 +601,36 @@ filmListContainer.addEventListener('click', (e) =>  {
 //Do the same as above, for movie a film from 'to watch' to 'watched'
 
 
-let filterSortBar = document.querySelector('#filter-sort-bar'); 
-filterSortBar.addEventListener('click', (e) => {
-	 if (e.target.id === 'title') {
-		console.log('title'); 
-		movieApp.sortData('film-title'); 
-	} if (e.target.id === 'year') {
-		console.log('year');
-		movieApp.sortData('film-year'); 
-	} if (e.target.id === 'director') {
-		console.log('director');
-		movieApp.sortData('film-director'); 
-	} if (e.target.id === 'genre') {
-		console.log('genre'); 
-		movieApp.sortData('film-genre'); 
-	} if (e.target.id === 'runtime') {
-		console.log('runtime');
-		movieApp.sortData('film-runtime'); 
-	} if (e.target.id === 'metascore') {
-		console.log('metascore');
-		movieApp.sortData('film-metascore'); 
-	} else {
-		console.log('no sort option selected'); 
-	}
+let filterSortBars = document.querySelectorAll('#filter-sort-bar'); 
+	filterSortBars.forEach((filterSortBar) => {
+		filterSortBar.addEventListener('click', (e) => {
+			console.log('filter sort bar element clicked'); 
+			const container = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+			console.log(container); 
+			 if (e.target.id === 'title') {
+				console.log('title');  
+				movieApp.sortData('film-title', container); 
+			} if (e.target.id === 'year') {
+				console.log('year');
+				movieApp.sortData('film-year', container); 
+			} if (e.target.id === 'director') {
+				console.log('director');
+				movieApp.sortData('film-director', container); 
+			} if (e.target.id === 'genre') {
+				console.log('genre'); 
+				movieApp.sortData('film-genre', container); 
+			} if (e.target.id === 'runtime') {
+				console.log('runtime');
+				movieApp.sortData('film-runtime', container); 
+			} if (e.target.id === 'metascore') {
+				console.log('metascore');
+				movieApp.sortData('film-metascore', container); 
+			} else {
+				console.log('no sort option selected'); 
+			}
 
-
-});
-
-let filterSortBarTwo = document.querySelector('#filter-sort-bar-two'); 
-filterSortBarTwo.addEventListener('click', (e) => {
-	if (e.target.classList.contains('title-Z-A')) {
-		console.log('title-Z-A');  
-	} if (e.target.classList.contains('title-A-Z')){
-		console.log('title-A-Z');
-	} if (e.target.classList.contains('year')){
-		console.log('year');
-	} if (e.target.classList.contains('director')){
-		console.log('director');
-	} if (e.target.classList.contains('genre')){
-		console.log('genre');
-	} if (e.target.classList.contains('runtime')){
-		console.log('runtime');
-	} if (e.target.classList.contains('metascore')) {
-		console.log('metascore'); 
-	} else {
-		console.log('no sort option selected'); 
-	}
-
-});
-
+		});
+	}); 
 
 
   
